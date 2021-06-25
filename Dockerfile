@@ -8,7 +8,7 @@ COPY go.sum .
 
 RUN go mod download
 
-COPY *.go
+COPY *.go .
 
 RUN go build -o /docker-bof
 

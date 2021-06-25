@@ -1,5 +1,7 @@
 package main
 
+//bof - bigouncefarms
+
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -8,7 +10,7 @@ import (
 	"server-bof/database"
 )
 
-func main()  {
+func main() {
 
 	database.MysqlConnection()
 
