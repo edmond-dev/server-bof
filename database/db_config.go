@@ -17,11 +17,12 @@ func MysqlConnection() {
 	dbPass := config.GetEnv("DB_PASS")
 	driverName := config.GetEnv("DB_DRIVER")
 
-	dns := fmt.Sprintf("%s:%s@tcp(%s)/%s", dbUser, dbPass, dbAddr, dbName)
+	dns := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=True&loc=Local", dbUser, dbPass, dbAddr, dbName)
 	db, err := sql.Open(driverName, dns)
 
 	if err != nil {
 		log.Println(err)
+		log.Println(dns)
 	}
 
 	err = db.Ping()

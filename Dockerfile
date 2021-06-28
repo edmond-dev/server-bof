@@ -1,17 +1,22 @@
-FROM golang:1.16-alpine
+##
+## Build
+##
+
+FROM golang:1.16-alpine AS builder
 
 WORKDIR /app
 
-COPY go.mod .
+COPY . .
 
-COPY go.sum .
+RUN go build -o main main.go
 
-RUN go mod download
+#Run stage
+FROM alpine:3.13
 
-COPY *.go .
+WORKDIR /app
 
-RUN go build -o /docker-bof
+COPY --from=builder /app/main .
 
-EXPOSE 7001
+EXPOSE 7001/tcp
 
-CMD [ "/docker-bof"]
+CMD [ "/app/main" ]

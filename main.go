@@ -1,7 +1,5 @@
 package main
 
-//bof - bigouncefarms
-
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -9,6 +7,8 @@ import (
 	"server-bof/config"
 	"server-bof/database"
 )
+
+//bof - bigouncefarms
 
 func main() {
 
