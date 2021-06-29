@@ -3,12 +3,10 @@ package main
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"server-bof/api/routes"
+	"server-bof/api/routes" //bof - bigouncefarms
 	"server-bof/config"
 	"server-bof/database"
 )
-
-//bof - bigouncefarms
 
 func main() {
 

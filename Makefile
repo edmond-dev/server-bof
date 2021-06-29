@@ -1,20 +1,26 @@
-postgres:
-	docker run --name postgres12 -p 5432:5432 -e POSTGRES_USER=root  e POSTGRES_PASSWORD=secret -d postgres:12-alpine
+#--------------------------------------------------------------------------------
+#================================|   MYSQL   |===================================
+#--------------------------------------------------------------------------------
+mysql:
+	docker run --name mysql80 -p 3306:3306 -e MYSQL_ROOT_PASSWORD=secret -d mysql:latest
 
-createdb:
-	docker exec -it postgres12  createdb --username=root --owner=root bigouncefarms
-dropdb:
-	docker exec -it postgres12 dropdb bigouncefarms
+mysqlbash:
+	docker exec -it mysql80 bash
 
-migrateup:
-	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/bigouncefarms?sslmode=disable" -verbose up
+createmysqldb:
+	docker exec -it mysql80 mysql --user=root --password=secret --execute="CREATE DATABASE bigouncefarms;"
 
-migratedown:
-	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/bigouncefarms?sslmode=disable" -verbose down
+dropmysqldb:
+	docker exec -it mysql80 mysql --user=root --password=secret --execute="DROP DATABASE bigouncefarms;"
+
+migratemysqlup:
+	migrate -path db/migration -database "mysql://root:secret@tcp(127.0.0.1:3306)/bigouncefarms"  up
+
+migratemysqldown:
+	migrate -path db/migration -database "mysql://root:secret@tcp(127.0.0.1:3306)/bigouncefarms"  down
+
 sqlc:
 	sqlc generate
 
-mysql:
-	docker run --name mysql8.0 -p 3306:3306 -e MYSQL_ROOT_PASSWORD=secret -d mysql:8.0
 
-.PHONY: postgres createdb dropdb migrateup migratedown sqlc
+.PHONY: createmysqldb dropmysqldb migratemysqlup migratemysqldown sqlc
