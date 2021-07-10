@@ -10,25 +10,25 @@ import (
 
 var DB *sql.DB
 
-func MysqlConnection() {
-	dbAddr := config.GetEnv("DB_ADDRESS")
-	dbName := config.GetEnv("DB_NAME")
-	dbUser := config.GetEnv("DB_USER")
-	dbPass := config.GetEnv("DB_PASS")
-	driverName := config.GetEnv("DB_DRIVER")
+func Connection() *sql.DB {
 
-	dns := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=True&loc=Local", dbUser, dbPass, dbAddr, dbName)
-	db, err := sql.Open(driverName, dns)
-
+	dns := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=True&loc=Local",
+		config.GetEnv("DB_USER"),
+		config.GetEnv("DB_PASS"),
+		config.GetEnv("DB_ADDRESS"),
+		config.GetEnv("DB"))
+	db, err := sql.Open("mysql", dns)
 	if err != nil {
-		log.Println(err)
-		log.Println(dns)
+		log.Fatal("Cannot connect to db", err)
 	}
-
 	err = db.Ping()
 	if err != nil {
 		log.Println(err)
 	}
 
-	DB = db
+	return db
+}
+
+func MysqlConnection() {
+	DB = Connection()
 }

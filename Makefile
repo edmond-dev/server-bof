@@ -10,6 +10,9 @@ mysqlbash:
 createmysqldb:
 	docker exec -it mysql80 mysql --user=root --password=secret --execute="CREATE DATABASE bigouncefarms;"
 
+createmysqltestdb:
+	docker exec -it mysql80 mysql --user=root --password=secret --execute="CREATE DATABASE bigouncefarms_test;"
+
 dropmysqldb:
 	docker exec -it mysql80 mysql --user=root --password=secret --execute="DROP DATABASE bigouncefarms;"
 
@@ -22,5 +25,8 @@ migratemysqldown:
 sqlc:
 	sqlc generate
 
+test:
+	go test  -v -cover ./db/...
 
-.PHONY: createmysqldb dropmysqldb migratemysqlup migratemysqldown sqlc
+
+.PHONY: createmysqldb dropmysqldb migratemysqlup migratemysqldown sqlc test createmysqltestdb

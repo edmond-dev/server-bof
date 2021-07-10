@@ -1,191 +1,107 @@
 package controllers
 
 import (
-	"database/sql"
+	"context"
 	"github.com/gofiber/fiber/v2"
-	"github.com/rs/xid"
 	"log"
-	"server-bof/auth"
 	"server-bof/database"
-	"server-bof/models"
+	db "server-bof/db/sqlc"
+	"strings"
 )
 
 func AddProduct(c *fiber.Ctx) error {
-	if auth.IsAdminAuth(c) {
 
-		data := new(models.Product)
-		if err := c.BodyParser(&data); err != nil {
-			return err
-		}
-		_, err := database.DB.Query(`
-			INSERT INTO products (product_id, image_url_public_id, image_url_secure_id, product_name, product_description, price)
-			VALUES (?, ?, ?, ?, ?, ?)`,
-			xid.New(), data.ImageUrlPublicID, data.ImageUrlSecureID, data.ProductName, data.ProductDescription, data.Price)
-		if err != nil {
-			log.Println(err)
-			return err
-		}
-		return c.JSON(fiber.Map{
-			"message": "product added successfully",
-		})
+	categoryId := c.Params("category_id")
+	store := db.NewStore(database.DB)
+	data := new(db.Product)
+	if err := c.BodyParser(&data); err != nil {
+		return err
+	}
+
+	arg := db.CreateProductParams{
+		ProductID:          strings.ToUpper(IdGeneration()),
+		CategoryID:         categoryId,
+		ImageUrlPublicID:   data.ImageUrlPublicID,
+		ImageUrlSecureID:   data.ImageUrlSecureID,
+		ProductName:        data.ProductName,
+		ProductDescription: data.ProductDescription,
+		Price:              data.Price,
+		QuantityInStock:    data.QuantityInStock,
+	}
+	_, err := store.CreateProduct(context.Background(), arg)
+	if err != nil {
+		log.Fatal(err)
 	}
 	return c.JSON(fiber.Map{
-		"error": "Failed to add product. Not an Admin",
+		"message": "product added successfully",
 	})
 }
 
 func GetProducts(c *fiber.Ctx) error {
-	results := models.Products{}
-	product := models.Product{}
-	rows, err := database.DB.Query(`SELECT *  FROM products`)
+	store := db.NewStore(database.DB)
 
+	rows, err := store.ListProducts(context.Background())
 	if err != nil {
 		return c.Status(500).JSON(err.Error())
 	}
-	defer func(rows *sql.Rows) {
-		err := rows.Close()
-		if err != nil {
-
-		}
-	}(rows)
-
-	for rows.Next() {
-
-		if err := rows.Scan(
-			&product.ProductID,
-			&product.ImageUrlPublicID,
-			&product.ImageUrlSecureID,
-			&product.ProductName,
-			&product.ProductDescription,
-			&product.Price,
-		); err != nil {
-			return err
-		}
-		results.Products = append(results.Products, product)
-
-	}
-	defer func(rows *sql.Rows) {
-		err := rows.Close()
-		if err != nil {
-
-		}
-	}(rows)
-	return c.JSON(results)
+	return c.JSON(rows)
 
 }
 
 func GetProduct(c *fiber.Ctx) error {
 	id := c.Params("product_id")
+	store := db.NewStore(database.DB)
 
-	product := models.Product{}
-
-	data := new(models.Product)
-	if err := c.BodyParser(&data); err != nil {
-		return err
-	}
-
-	rows, err := database.DB.Query(`
-		SELECT *
-		FROM products p
-		WHERE p.product_id = ?
-		`, id)
-
+	rows, err := store.GetProduct(context.Background(), id)
 	if err != nil {
 		return c.Status(500).JSON(err.Error())
 	}
-	defer func(rows *sql.Rows) {
-		err := rows.Close()
-		if err != nil {
-
-		}
-	}(rows)
-
-	for rows.Next() {
-
-		if err := rows.Scan(
-			&product.ProductID,
-			&product.ImageUrlPublicID,
-			&product.ImageUrlSecureID,
-			&product.ProductName,
-			&product.ProductDescription,
-			&product.Price,
-		); err != nil {
-			return err
-		}
-
-	}
-	defer func(rows *sql.Rows) {
-		err := rows.Close()
-		if err != nil {
-
-		}
-	}(rows)
-
-	return c.JSON(product)
+	return c.JSON(rows)
 
 }
 
 func UpdateProduct(c *fiber.Ctx) error {
+	//id := c.Params("product_id")
+	store := db.NewStore(database.DB)
 
-	id := c.Params("product_id")
-
-	data := new(models.Product)
+	data := new(db.Product)
 	if err := c.BodyParser(&data); err != nil {
 		return err
 	}
 
-	if auth.IsAdminAuth(c) {
-		res, err := database.DB.Query(`
-			UPDATE products
-			SET image_url_public_id = ?, image_url_secure_id = ?, product_name = ?, product_description = ?, price = ?
-			WHERE product_id = ?`,
-			data.ImageUrlSecureID, data.ImageUrlPublicID, data.ProductName, data.ProductDescription, data.Price, id)
-		if err != nil {
-			return err
-		}
-		defer func(res *sql.Rows) {
-			err := res.Close()
-			if err != nil {
-
-			}
-		}(res)
-		return c.JSON(fiber.Map{
-			"message": "Product updated successfully",
-		})
+	arg := db.UpdateProductParams{
+		ImageUrlPublicID:   data.ImageUrlPublicID,
+		ImageUrlSecureID:   data.ImageUrlSecureID,
+		ProductName:        data.ProductName,
+		ProductDescription: data.ProductDescription,
+		Price:              data.Price,
+		QuantityInStock:    data.QuantityInStock,
 	}
-
+	err := store.UpdateProduct(context.Background(), arg)
+	if err != nil {
+		return err
+	}
 	return c.JSON(fiber.Map{
-		"error": "Product update failed. Not an Admin",
+		"message": "Product updated successfully",
 	})
 }
 
 func RemoveProduct(c *fiber.Ctx) error {
 
 	id := c.Params("product_id")
+	store := db.NewStore(database.DB)
 
-	data := new(models.Product)
+	data := new(db.Product)
 	if err := c.BodyParser(&data); err != nil {
 		return err
 	}
 
-	if auth.IsAdminAuth(c) {
-		res, err := database.DB.Query("DELETE FROM products WHERE product_id = ?", id)
-		if err != nil {
-			return err
-		}
-		defer func(res *sql.Rows) {
-			err := res.Close()
-			if err != nil {
-
-			}
-		}(res)
-		return c.JSON(fiber.Map{
-			"message": "Product deleted successfully",
-		})
+	err := store.DeleteProduct(context.Background(), id)
+	if err != nil {
+		return err
 	}
 
 	return c.JSON(fiber.Map{
-		"error": "Could not delete product. Not an Admin",
+		"message": "Product deleted successfully",
 	})
 }
-

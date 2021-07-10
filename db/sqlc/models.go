@@ -3,62 +3,78 @@
 package db
 
 import (
-	"database/sql"
+	"time"
 )
 
 type Address struct {
-	ID            int64          `json:"id"`
-	AddressUserID string         `json:"addressUserID"`
-	OrderID       sql.NullString `json:"orderID"`
-	Email         string         `json:"email"`
-	Street        string         `json:"street"`
-	AddressLine1  string         `json:"addressLine1"`
-	AddressLine2  string         `json:"addressLine2"`
-	City          string         `json:"city"`
-	State         string         `json:"state"`
-	ZipCode       string         `json:"zipCode"`
+	AddressCustomerID string `json:"addressCustomerID"`
+	Email             string `json:"email"`
+	Street            string `json:"street"`
+	AddressLine1      string `json:"addressLine1"`
+	AddressLine2      string `json:"addressLine2"`
+	Phone             string `json:"phone"`
+	City              string `json:"city"`
+	State             string `json:"state"`
+	ZipCode           string `json:"zipCode"`
 }
 
 type Category struct {
-	ID           int64  `json:"id"`
-	CategoryID   string `json:"categoryID"`
-	CategoryName string `json:"categoryName"`
+	CategoryID              string `json:"categoryID"`
+	CategoryName            string `json:"categoryName"`
+	CategoryHtmlDescription string `json:"categoryHtmlDescription"`
+	Image                   string `json:"image"`
+}
+
+type Customer struct {
+	CustomerID string    `json:"customerID"`
+	FirstName  string    `json:"firstName"`
+	LastName   string    `json:"lastName"`
+	Email      string    `json:"email"`
+	Password   string    `json:"password"`
+	CreatedAt  time.Time `json:"createdAt"`
 }
 
 type Order struct {
-	ID          int64         `json:"id"`
-	OrderID     string        `json:"orderID"`
-	Quantity    sql.NullInt32 `json:"quantity"`
-	TotalAmount sql.NullInt64 `json:"totalAmount"`
-	// When order created
-	CreatedAt sql.NullString `json:"createdAt"`
+	OrderNumber       string    `json:"orderNumber"`
+	CustomerID        string    `json:"customerID"`
+	ProductID         string    `json:"productID"`
+	OrderCategoryName string    `json:"orderCategoryName"`
+	QuantityOrdered   int32     `json:"quantityOrdered"`
+	PriceEach         int32     `json:"priceEach"`
+	CustomerComments  string    `json:"customerComments"`
+	OrderedDate       time.Time `json:"orderedDate"`
+}
+
+type OrderDetail struct {
+	OrderNumber string `json:"orderNumber"`
+	ShippedDate string `json:"shippedDate"`
+	Status      string `json:"status"`
+	Comments    string `json:"comments"`
+}
+
+type Payment struct {
+	CustomerID      string    `json:"customerID"`
+	PaymentDate     time.Time `json:"paymentDate"`
+	PaymentMethodID string    `json:"paymentMethodID"`
+	Amount          int64     `json:"amount"`
 }
 
 type Product struct {
-	ID                 int64        `json:"id"`
-	ProductID          string       `json:"productID"`
-	ImageUrlPublicID   string       `json:"imageUrlPublicID"`
-	ImageUrlSecureID   string       `json:"imageUrlSecureID"`
-	ProductName        string       `json:"productName"`
-	ProductDescription string       `json:"productDescription"`
-	Price              int64        `json:"price"`
-	CreatedAt          sql.NullTime `json:"createdAt"`
+	ProductID          string    `json:"productID"`
+	CategoryID         string    `json:"categoryID"`
+	ImageUrlPublicID   string    `json:"imageUrlPublicID"`
+	ImageUrlSecureID   string    `json:"imageUrlSecureID"`
+	ProductName        string    `json:"productName"`
+	ProductDescription string    `json:"productDescription"`
+	Price              int64     `json:"price"`
+	QuantityInStock    string    `json:"quantityInStock"`
+	CreatedAt          time.Time `json:"createdAt"`
 }
 
 type Review struct {
-	ID           int64          `json:"id"`
-	ReviewID     string         `json:"reviewID"`
-	UserReviewID sql.NullString `json:"userReviewID"`
-	Review       string         `json:"review"`
-	CreatedAt    sql.NullTime   `json:"createdAt"`
-}
-
-type User struct {
-	ID        int64        `json:"id"`
-	UserID    string       `json:"userID"`
-	FirstName string       `json:"firstName"`
-	LastName  string       `json:"lastName"`
-	Email     string       `json:"email"`
-	Password  string       `json:"password"`
-	CreatedAt sql.NullTime `json:"createdAt"`
+	ReviewID         string    `json:"reviewID"`
+	ProductReviewID  string    `json:"productReviewID"`
+	CustomerReviewID string    `json:"customerReviewID"`
+	Review           string    `json:"review"`
+	CreatedAt        time.Time `json:"createdAt"`
 }

@@ -3,7 +3,8 @@ package main
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"server-bof/api/routes" //bof - bigouncefarms
+	"github.com/gofiber/fiber/v2/middleware/logger"
+	"server-bof/api/routes"
 	"server-bof/config"
 	"server-bof/database"
 )
@@ -11,13 +12,20 @@ import (
 func main() {
 
 	database.MysqlConnection()
+	port := config.GetEnv("DEFAULT_PORT")
+	app := fiber.New()
 
-	port, app := config.GetEnv("DEFAULT_PORT"), fiber.New()
-	routes.Routes(app)
-	//middlewares
+	//CORS middleware config
 	app.Use(cors.New(cors.Config{
+		AllowOrigins:     "*",
+		AllowMethods:     "POST, GET, DELETE, PATCH, PUT",
+		AllowHeaders:     "",
 		AllowCredentials: true,
+		MaxAge:           0,
 	}))
+	app.Use(logger.New(logger.ConfigDefault))
+
+	routes.Routes(app)
 
 	err := app.Listen(port)
 	if err != nil {

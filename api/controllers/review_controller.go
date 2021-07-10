@@ -1,26 +1,23 @@
 package controllers
 
 import (
-	"database/sql"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gofiber/fiber/v2"
-	"github.com/rs/xid"
+	"golang.org/x/net/context"
 	"server-bof/config"
 	"server-bof/database"
-	"server-bof/models"
+	db "server-bof/db/sqlc"
+	"strings"
 )
 
 func AddReview(c *fiber.Ctx) error {
-
 	secretKey := config.GetEnv("JWT_SECRET")
 	cookie := c.Cookies("jwtToken")
+	id := c.Params("product_id")
+	store := db.NewStore(database.DB)
 
-	data := new(models.Review)
-	if err := c.BodyParser(&data); err != nil {
-		return err
-	}
-	product := new(models.Product)
-	if err := c.BodyParser(&product); err != nil {
+	dataReview := new(db.Review)
+	if err := c.BodyParser(&dataReview); err != nil {
 		return err
 	}
 
@@ -36,100 +33,29 @@ func AddReview(c *fiber.Ctx) error {
 	}
 	claims := token.Claims.(*jwt.StandardClaims)
 
-	res, err := database.DB.Query("SELECT * FROM users WHERE user_id = ?", claims.Issuer)
+	arg := db.CreateReviewParams{
+		ReviewID:         strings.ToUpper(IdGeneration()),
+		ProductReviewID:  id,
+		CustomerReviewID: claims.Issuer,
+		Review:           dataReview.Review,
+	}
+
+	_, err = store.CreateReview(context.Background(), arg)
 	if err != nil {
 		return err
 	}
-
-	user := models.User{}
-	if res.Next() {
-
-		err := res.Scan(&user.UserID, &user.FirstName, &user.LastName, &user.Email, &user.Role, &user.Password)
-		if err != nil {
-			return err
-		}
-	}
-	if user.Email == "" {
-		return c.JSON(fiber.Map{
-			"error": "Failed to add review",
-		})
-	}
-	result, err := database.DB.Query(`
-		INSERT INTO reviews (review_id, user_id,product_id, reviews, name, email)
-		VALUES (?, ?, ?, ?, ?, ?)`,
-		xid.New(), user.UserID, product.ProductID, data.Reviews, user.FirstName, user.Email)
-
-	if err != nil {
-		return err
-	}
-	defer func(result *sql.Rows) {
-		err := result.Close()
-		if err != nil {
-
-		}
-	}(result)
-
 	return c.JSON(fiber.Map{
 		"message": "Review added successfully",
 	})
 }
 
-func GetReview(c *fiber.Ctx) error {
-	review := models.Review{}
-
-	data := new(models.Product)
-	if err := c.BodyParser(&data); err != nil {
-		return err
-	}
-
-	rows, err := database.DB.Query(`
-		SELECT r.review_id, r.product_id, r.user_id, r.reviews, r.name, r.email
-		FROM products p
-		JOIN reviews r on p.product_id = r.product_id
-		WHERE p.product_id = ?
-		`, data.ProductID)
-
-	if err != nil {
-		return c.Status(500).JSON(err.Error())
-	}
-	defer func(rows *sql.Rows) {
-		err := rows.Close()
-		if err != nil {
-
-		}
-	}(rows)
-
-	for rows.Next() {
-
-		if err := rows.Scan(
-			&review.ReviewID,
-			&review.ProductID,
-			&review.UserID,
-			&review.Reviews,
-			&review.Name,
-			&review.Email,
-		); err != nil {
-			return err
-		}
-
-	}
-	defer func(rows *sql.Rows) {
-		err := rows.Close()
-		if err != nil {
-
-		}
-	}(rows)
-
-	return c.JSON(review)
-
-}
-
 func UpdateReview(c *fiber.Ctx) error {
 
+	store := db.NewStore(database.DB)
 	secretKey := config.GetEnv("JWT_SECRET")
 	cookie := c.Cookies("jwtToken")
 
-	data := new(models.Review)
+	data := new(db.Review)
 	if err := c.BodyParser(&data); err != nil {
 		return err
 	}
@@ -144,21 +70,23 @@ func UpdateReview(c *fiber.Ctx) error {
 		})
 	}
 	claims := token.Claims.(*jwt.StandardClaims)
-	_, err = database.DB.Query("SELECT * FROM users WHERE user_id = ?", claims.Issuer)
-	if err != nil {
-		return err
-	}
-	res, err := database.DB.Query("UPDATE reviews SET reviews = ? WHERE review_id = ?", data.Reviews, data.ReviewID)
+	customer, err := store.GetCustomerWithId(context.Background(), claims.Issuer)
 	if err != nil {
 		return err
 	}
 
-	defer func(res *sql.Rows) {
-		err := res.Close()
-		if err != nil {
+	if customer.CustomerID != claims.Issuer {
+		return nil
+	}
 
-		}
-	}(res)
+	arg := db.UpdateReviewParams{
+		Review:   data.Review,
+		ReviewID: data.ReviewID,
+	}
+	err = store.UpdateReview(context.Background(), arg)
+	if err != nil {
+		return err
+	}
 
 	return c.JSON(fiber.Map{
 		"message": "review updated successfully",
@@ -169,8 +97,9 @@ func RemoveReview(c *fiber.Ctx) error {
 
 	secretKey := config.GetEnv("JWT_SECRET")
 	cookie := c.Cookies("jwtToken")
+	store := db.NewStore(database.DB)
 
-	data := new(models.Review)
+	data := new(db.Review)
 	if err := c.BodyParser(&data); err != nil {
 		return err
 	}
@@ -186,16 +115,9 @@ func RemoveReview(c *fiber.Ctx) error {
 		})
 	}
 
-	res, err := database.DB.Query("DELETE FROM reviews WHERE review_id = ?", data.ReviewID)
+	err = store.DeleteReview(context.Background(), data.ReviewID)
 	if err != nil {
 		return err
 	}
-	defer func(res *sql.Rows) {
-		err := res.Close()
-		if err != nil {
-
-		}
-	}(res)
-
 	return c.JSON("Review deleted successfully")
 }
