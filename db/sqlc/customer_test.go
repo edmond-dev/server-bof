@@ -15,6 +15,7 @@ func createRandomCustomer(t *testing.T) Customer {
 		FirstName:  util.RandomFirstName(),
 		LastName:   util.RandomLastName(),
 		Email:      util.RandomEmail(),
+		Role:       "customer",
 		Password:   util.RandomPass(),
 	}
 	_, err := testQueries.CreateCustomer(context.Background(), arg)

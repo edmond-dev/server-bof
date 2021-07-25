@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/gofiber/fiber/v2"
 	"log"
+	"server-bof/auth"
 	"server-bof/database"
 	db "server-bof/db/sqlc"
 	"strings"
@@ -11,16 +12,22 @@ import (
 
 func AddProduct(c *fiber.Ctx) error {
 
-	categoryId := c.Params("category_id")
+	auth.IsAdminAuth(c)
+
 	store := db.NewStore(database.DB)
 	data := new(db.Product)
+	category := new(db.Category)
+
+	if err := c.BodyParser(&category); err != nil {
+		log.Fatal(err.Error())
+	}
 	if err := c.BodyParser(&data); err != nil {
 		return err
 	}
 
 	arg := db.CreateProductParams{
 		ProductID:          strings.ToUpper(IdGeneration()),
-		CategoryID:         categoryId,
+		CategoryID:         category.CategoryID,
 		ImageUrlPublicID:   data.ImageUrlPublicID,
 		ImageUrlSecureID:   data.ImageUrlSecureID,
 		ProductName:        data.ProductName,
@@ -61,6 +68,8 @@ func GetProduct(c *fiber.Ctx) error {
 }
 
 func UpdateProduct(c *fiber.Ctx) error {
+
+	auth.IsAdminAuth(c)
 	//id := c.Params("product_id")
 	store := db.NewStore(database.DB)
 
@@ -87,6 +96,8 @@ func UpdateProduct(c *fiber.Ctx) error {
 }
 
 func RemoveProduct(c *fiber.Ctx) error {
+
+	auth.IsAdminAuth(c)
 
 	id := c.Params("product_id")
 	store := db.NewStore(database.DB)

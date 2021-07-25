@@ -28,6 +28,7 @@ func UserCtrlRegister(c *fiber.Ctx) error {
 		FirstName:  data.FirstName,
 		LastName:   data.LastName,
 		Email:      data.Email,
+		Role:       "customer",
 		Password:   string(password),
 	}
 
@@ -37,6 +38,35 @@ func UserCtrlRegister(c *fiber.Ctx) error {
 	}
 
 	return c.JSON("Registration successfully!")
+}
+
+//Create Admin
+
+func CreateAdmin(c *fiber.Ctx) error {
+	store := db.NewStore(database.DB)
+
+	data := new(db.Customer)
+	if err := c.BodyParser(data); err != nil {
+		return c.Status(400).JSON(err.Error())
+	}
+
+	password, _ := bcrypt.GenerateFromPassword([]byte(data.Password), 10)
+
+	arg := db.CreateCustomerParams{
+		CustomerID: strings.ToUpper(IdGeneration()),
+		FirstName:  data.FirstName,
+		LastName:   data.LastName,
+		Email:      data.Email,
+		Role:       "SuperUser",
+		Password:   string(password),
+	}
+
+	_, err := store.CreateCustomer(context.Background(), arg)
+	if err != nil {
+		return c.Status(500).JSON(err.Error())
+	}
+
+	return c.JSON("Super user created successfully!")
 }
 
 ////user log in method
@@ -55,6 +85,7 @@ func UserCtrlLogin(c *fiber.Ctx) error {
 		c.Status(fiber.StatusNotFound)
 		return c.JSON(fiber.Map{
 			"Error": "User not found",
+			"data":  data,
 		})
 	}
 

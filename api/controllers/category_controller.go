@@ -3,12 +3,15 @@ package controllers
 import (
 	"context"
 	"github.com/gofiber/fiber/v2"
+	"server-bof/auth"
 	"server-bof/database"
 	db "server-bof/db/sqlc"
 	"strings"
 )
 
 func AddCategory(c *fiber.Ctx) error {
+
+	auth.IsAdminAuth(c)
 
 	store := db.NewStore(database.DB)
 	data := new(db.Category)
@@ -45,7 +48,10 @@ func GetCategories(c *fiber.Ctx) error {
 }
 
 func GetCategory(c *fiber.Ctx) error {
-	categoryId := c.Path("category_id")
+
+	auth.IsAdminAuth(c)
+
+	categoryId := c.Params("category_id")
 	store := db.NewStore(database.DB)
 
 	category, err := store.GetCategory(context.Background(), categoryId)
@@ -57,6 +63,9 @@ func GetCategory(c *fiber.Ctx) error {
 }
 
 func UpdateCategory(c *fiber.Ctx) error {
+
+	auth.IsAdminAuth(c)
+
 	id := c.Params("category_id")
 	store := db.NewStore(database.DB)
 	data := new(db.Category)
@@ -81,6 +90,9 @@ func UpdateCategory(c *fiber.Ctx) error {
 }
 
 func DeleteCategory(c *fiber.Ctx) error {
+
+	auth.IsAdminAuth(c)
+
 	id := c.Params("category_id")
 	store := db.NewStore(database.DB)
 

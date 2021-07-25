@@ -7,12 +7,14 @@ import (
 
 func Routes(app *fiber.App) {
 
+	app.Post("/api/v1/admin/create", controllers.CreateAdmin)
+
 	//Category routes
-	app.Post("/api/category/add", controllers.AddCategory)
-	app.Get("/api/category/categories", controllers.GetCategories)
-	app.Get("/api/category/get/:category_id", controllers.GetCategory)
-	app.Put("/api/category/update", controllers.UpdateCategory)
-	app.Delete("/api/category/remove/:category_id", controllers.DeleteCategory)
+	app.Post("/api/v1/category/add", controllers.AddCategory)
+	app.Get("/api/v1/category/categories", controllers.GetCategories)
+	app.Get("/api/v1/category/get/:category_id", controllers.GetCategory)
+	app.Put("/api/v1/category/update", controllers.UpdateCategory)
+	app.Delete("/api/v1/category/remove/:category_id", controllers.DeleteCategory)
 
 	//Address routes
 	app.Post("/api/address/add", controllers.AddAddress)
@@ -34,7 +36,7 @@ func Routes(app *fiber.App) {
 	app.Put("/api/v1/customer/update", controllers.UpdateUser)
 	app.Post("/api/v1/customer/logout", controllers.Logout)
 	app.Get("/api/v1/customer/get", controllers.GetUser)
-	app.Post("/api/v1/customer/get/orders", controllers.GetCustomerOrderDetails)
+	app.Get("/api/v1/customer/get/orders", controllers.GetCustomerOrderDetails)
 
 	//Review routes
 	app.Post("/api/review/add", controllers.AddReview)
@@ -42,7 +44,7 @@ func Routes(app *fiber.App) {
 	app.Delete("/api/review/delete", controllers.RemoveReview)
 
 	//Product routes
-	app.Post("/api/product/add", controllers.AddProduct)
+	app.Post("/api/v1/product/add", controllers.AddProduct)
 	app.Get("/api/product/get", controllers.GetProducts)
 	app.Get("/api/product/:product_id", controllers.GetProduct)
 	app.Put("/api/product/update/:product_id", controllers.UpdateProduct)

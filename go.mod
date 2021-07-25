@@ -3,12 +3,14 @@ module server-bof
 go 1.16
 
 require (
+	github.com/calce/sgo v0.0.0-20150515081034-5d9960aeb5de // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/gofiber/fiber/v2 v2.13.0
 	github.com/google/uuid v1.2.0 // indirect
 	github.com/joho/godotenv v1.3.0
 	github.com/kyleconroy/sqlc v1.8.0 // indirect
+	github.com/pquerna/ffjson v0.0.0-20190930134022-aa0246cd15f7 // indirect
 	github.com/spf13/viper v1.8.1 // indirect
 	github.com/stretchr/testify v1.7.0 // indirect
 	github.com/stripe/stripe-go v70.15.0+incompatible

@@ -44,7 +44,7 @@ func (q *Queries) DeleteReview(ctx context.Context, reviewID string) error {
 }
 
 const getProductReviews = `-- name: GetProductReviews :one
-SELECT r.review_id, r.product_review_id, r.customer_review_id, r.review, r.created_at, c.customer_id, c.first_name, c.last_name, c.email, c.password, c.created_at FROM reviews r
+SELECT r.review_id, r.product_review_id, r.customer_review_id, r.review, r.created_at, c.customer_id, c.first_name, c.last_name, c.email, c.role, c.password, c.created_at FROM reviews r
 LEFT JOIN products p on p.product_id = r.product_review_id
 LEFT JOIN customers c on c.customer_id = r.customer_review_id
 WHERE review_id = ?
@@ -61,6 +61,7 @@ type GetProductReviewsRow struct {
 	FirstName        string    `json:"firstName"`
 	LastName         string    `json:"lastName"`
 	Email            string    `json:"email"`
+	Role             string    `json:"role"`
 	Password         string    `json:"password"`
 	CreatedAt_2      time.Time `json:"createdAt2"`
 }
@@ -78,6 +79,7 @@ func (q *Queries) GetProductReviews(ctx context.Context, reviewID string) (GetPr
 		&i.FirstName,
 		&i.LastName,
 		&i.Email,
+		&i.Role,
 		&i.Password,
 		&i.CreatedAt_2,
 	)

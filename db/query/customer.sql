@@ -1,8 +1,8 @@
 -- name: CreateCustomer :execresult
 INSERT INTO customers (
-  customer_id, first_name, last_name, email, password
+  customer_id, first_name, last_name, email, role, password
 ) VALUES (
-       ?, ?, ?, ?, ?
+       ?, ?, ?, ?, ?, ?
  );
 
 /* name: UpdateCustomer :exec */

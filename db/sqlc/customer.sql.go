@@ -11,9 +11,9 @@ import (
 
 const createCustomer = `-- name: CreateCustomer :execresult
 INSERT INTO customers (
-  customer_id, first_name, last_name, email, password
+  customer_id, first_name, last_name, email, role, password
 ) VALUES (
-       ?, ?, ?, ?, ?
+       ?, ?, ?, ?, ?, ?
  )
 `
 
@@ -22,6 +22,7 @@ type CreateCustomerParams struct {
 	FirstName  string `json:"firstName"`
 	LastName   string `json:"lastName"`
 	Email      string `json:"email"`
+	Role       string `json:"role"`
 	Password   string `json:"password"`
 }
 
@@ -31,6 +32,7 @@ func (q *Queries) CreateCustomer(ctx context.Context, arg CreateCustomerParams) 
 		arg.FirstName,
 		arg.LastName,
 		arg.Email,
+		arg.Role,
 		arg.Password,
 	)
 }
@@ -104,7 +106,7 @@ func (q *Queries) GetCustomerOrderDetailsAndAddr(ctx context.Context, customerID
 }
 
 const getCustomerWithEmail = `-- name: GetCustomerWithEmail :one
-SELECT customer_id, first_name, last_name, email, password, created_at FROM customers
+SELECT customer_id, first_name, last_name, email, role, password, created_at FROM customers
 WHERE email = ? LIMIT 1
 `
 
@@ -116,6 +118,7 @@ func (q *Queries) GetCustomerWithEmail(ctx context.Context, email string) (Custo
 		&i.FirstName,
 		&i.LastName,
 		&i.Email,
+		&i.Role,
 		&i.Password,
 		&i.CreatedAt,
 	)
@@ -123,7 +126,7 @@ func (q *Queries) GetCustomerWithEmail(ctx context.Context, email string) (Custo
 }
 
 const getCustomerWithId = `-- name: GetCustomerWithId :one
-SELECT customer_id, first_name, last_name, email, password, created_at FROM customers
+SELECT customer_id, first_name, last_name, email, role, password, created_at FROM customers
 WHERE customer_id = ? LIMIT 1
 `
 
@@ -135,6 +138,7 @@ func (q *Queries) GetCustomerWithId(ctx context.Context, customerID string) (Cus
 		&i.FirstName,
 		&i.LastName,
 		&i.Email,
+		&i.Role,
 		&i.Password,
 		&i.CreatedAt,
 	)
