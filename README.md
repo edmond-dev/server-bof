@@ -1,3 +1,3 @@
 # server-bof
 
-Developing some APIs for sample Ecommerce plaform.
+Developing some APIs for a sample Ecommerce plaform.
